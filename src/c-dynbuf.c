@@ -15,7 +15,7 @@
 #define BUFSZ_THRESHOLD		((size_t)10 * 1024 * 1024)
 #define BUFSZ_INCREMENT		((size_t)1 * 1024 * 1024)
 
-static int buf_expand_to(CDynBuf *buf, int datasz) {
+static int _expand_buf_to(CDynBuf *buf, int datasz) {
 	int newsz;
 	unsigned char *newp;
 
@@ -47,14 +47,14 @@ static int buf_expand_to(CDynBuf *buf, int datasz) {
 	return 0;
 }
 
-static void buf_memcpy(CDynBuf *buf, off_t dst_pos, off_t src_pos, size_t len) {
+static void _inbuf_memcpy(CDynBuf *buf, off_t dst_pos, off_t src_pos, size_t len) {
 	size_t i;
 	for (i = 0; i < len; i++) {
 		buf->p[dst_pos + i] = buf->p[src_pos + i];
 	}
 }
 
-static void buf_memcpy_reverse(CDynBuf *buf, off_t dst_pos, off_t src_pos, size_t len) {
+static void _inbuf_memcpy_reverse(CDynBuf *buf, off_t dst_pos, off_t src_pos, size_t len) {
 	if (len > 0) {
 		size_t i = len - 1;
 		while (1) {
@@ -139,7 +139,7 @@ _public_ int c_dynbuf_append(CDynBuf *buf, const void *data, size_t len) {
 	assert(buf != NULL);
 	assert(data != NULL);
 
-	r = buf_expand_to(buf, buf->len + len);
+	r = _expand_buf_to(buf, buf->len + len);
 	if (r < 0)
 		return r;
 
@@ -167,11 +167,11 @@ _public_ int c_dynbuf_insert(CDynBuf *buf, off_t pos, const void *data, size_t l
 	if (len == 0)
 		return 0;
 
-	r = buf_expand_to(buf, buf->len + len);
+	r = _expand_buf_to(buf, buf->len + len);
 	if (r < 0)
 		return r;
 
-	buf_memcpy_reverse(buf, pos + len, pos, buf->len - pos);
+	_inbuf_memcpy_reverse(buf, pos + len, pos, buf->len - pos);
 
 	memcpy(buf->p + pos, data, len);
 	buf->len += len;
@@ -194,7 +194,7 @@ _public_ int c_dynbuf_write(CDynBuf *buf, off_t pos, const void *data, size_t le
 	assert(pos >= 0 && pos <= buf->len);
 	assert(data != NULL);
 
-	r = buf_expand_to(buf, pos + len);
+	r = _expand_buf_to(buf, pos + len);
 	if (r < 0)
 		return r;
 
@@ -216,7 +216,7 @@ _public_ int c_dynbuf_append_c(CDynBuf *buf, int c, size_t n) {
 
 	assert(buf != NULL);
 
-	r = buf_expand_to(buf, buf->len + n);
+	r = _expand_buf_to(buf, buf->len + n);
 	if (r < 0)
 		return r;
 
@@ -243,11 +243,11 @@ _public_ int c_dynbuf_insert_c(CDynBuf *buf, off_t pos, int c, size_t n) {
 	if (n == 0)
 		return 0;
 
-	r = buf_expand_to(buf, buf->len + n);
+	r = _expand_buf_to(buf, buf->len + n);
 	if (r < 0)
 		return r;
 
-	buf_memcpy_reverse(buf, pos + n, pos, buf->len - pos);
+	_inbuf_memcpy_reverse(buf, pos + n, pos, buf->len - pos);
 
 	memset(buf->p + pos, c, n);
 	buf->len += n;
@@ -268,7 +268,7 @@ _public_ int c_dynbuf_write_c(CDynBuf *buf, off_t pos, int c, size_t n) {
 	assert(buf != NULL);
 	assert(pos >= 0 && pos <= buf->len);
 
-	r = buf_expand_to(buf, pos + n);
+	r = _expand_buf_to(buf, pos + n);
 	if (r < 0)
 		return r;
 
@@ -292,7 +292,7 @@ _public_ void c_dynbuf_remove(CDynBuf *buf, off_t pos, size_t len) {
 	if (len == 0)
 		return;
 
-	buf_memcpy(buf, pos, pos + len, buf->len - (pos + len));
+	_inbuf_memcpy(buf, pos, pos + len, buf->len - (pos + len));
 	buf->len -= len;
 }
 
