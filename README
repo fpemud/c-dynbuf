@@ -1,0 +1,23 @@
+c-dynbuf - Dynamic Buffer Implementation in Standard ISO-C11
+
+DETAILS:
+        https://github.com/fpemud/c-dynbuf
+
+BUG REPORTS:
+        https://github.com/fpemud/c-dynbuf/issues
+
+GIT:
+        git@github.com:fpemud/c-dynbuf.git
+        https://github.com/fpemud/c-dynbuf.git
+
+GITWEB:
+        https://github.com/fpemud/c-dynbuf
+
+LICENSE:
+        LGPL-3.0
+        See LICENSE for details.
+
+ABOUT:
+        The c-dynbuf library provides a dynamic memory buffer abstraction
+        which provides appending, insertion and partial/total removal
+        without worrying about memory management.

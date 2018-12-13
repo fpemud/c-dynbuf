@@ -1,0 +1,17 @@
+LIBCDYNBUF_1 {
+global:
+	c_dynbuf_init;
+	c_dynbuf_deinit;
+	c_dynbuf_new;
+	c_dynbuf_free;
+	c_dynbuf_append;
+	c_dynbuf_insert;
+	c_dynbuf_write;
+	c_dynbuf_append_c;
+	c_dynbuf_insert_c;
+	c_dynbuf_write_c;
+	c_dynbuf_remove;
+	c_dynbuf_clear;
+local:
+	*;
+};
