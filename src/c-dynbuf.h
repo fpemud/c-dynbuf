@@ -7,6 +7,9 @@
  * without worrying about memory management.
  */
 
+#ifndef __C_DYNBUF__
+#define __C_DYNBUF__
+
 #ifdef __cpluscplus
 extern "C" {
 #endif
@@ -48,4 +51,6 @@ void c_dynbuf_clear(CDynBuf *buf);
 
 #ifdef __cpluscplus
 }
+#endif
+
 #endif

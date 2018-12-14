@@ -6,7 +6,6 @@
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
-
 #include "c-dynbuf.h"
 
 #define _public_ __attribute__((__visibility__("default")))
