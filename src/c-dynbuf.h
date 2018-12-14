@@ -32,14 +32,18 @@ void c_dynbuf_init(CDynBuf *buf);
 void c_dynbuf_deinit(CDynBuf *buf);
 
 int c_dynbuf_append(CDynBuf *buf, const void *data, size_t len);
-int c_dynbuf_insert(CDynBuf *buf, off_t pos, const void *data, size_t len);
-int c_dynbuf_write(CDynBuf *buf, off_t pos, const void *data, size_t len);
-
 int c_dynbuf_append_c(CDynBuf *buf, int c, size_t n);
+
+int c_dynbuf_insert(CDynBuf *buf, off_t pos, const void *data, size_t len);
 int c_dynbuf_insert_c(CDynBuf *buf, off_t pos, int c, size_t n);
+void c_dynbuf_remove(CDynBuf *buf, off_t pos, size_t len);
+
+int c_dynbuf_write(CDynBuf *buf, off_t pos, const void *data, size_t len);
 int c_dynbuf_write_c(CDynBuf *buf, off_t pos, int c, size_t n);
 
-void c_dynbuf_remove(CDynBuf *buf, off_t pos, size_t len);
+int c_dynbuf_expand(CDynBuf *buf, size_t len);
+void c_dynbuf_shrink(CDynBuf *buf, size_t len);
+
 void c_dynbuf_clear(CDynBuf *buf);
 
 #ifdef __cpluscplus

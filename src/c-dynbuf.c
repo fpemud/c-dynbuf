@@ -20,9 +20,8 @@ static int _expand_buf_to(CDynBuf *buf, int datasz) {
 	unsigned char *newp;
 
 	newsz = buf->_size;
-	if (newsz < BUFSZ_INIT) {
+	if (newsz < BUFSZ_INIT)
 		newsz = BUFSZ_INIT;
-	}
 	while (newsz < datasz) {
 		if (newsz < BUFSZ_THRESHOLD)
 			newsz *= 2;
@@ -35,7 +34,7 @@ static int _expand_buf_to(CDynBuf *buf, int datasz) {
 		if (newp == NULL)
 			return -ENOMEM;
 
-		if (buf->_size > 0) {
+		if (buf->p != NULL) {
 			memcpy(newp, buf->p, buf->len);
 			free(buf->p);
 		}
@@ -150,6 +149,27 @@ _public_ int c_dynbuf_append(CDynBuf *buf, const void *data, size_t len) {
 }
 
 /**
+ * c_dynbuf_append_c() - XXX
+ * @buf:                  dynamic buffer object to operate on
+ * @c:
+ * @n:
+ */
+_public_ int c_dynbuf_append_c(CDynBuf *buf, int c, size_t n) {
+	int r;
+
+	assert(buf != NULL);
+
+	r = _expand_buf_to(buf, buf->len + n);
+	if (r < 0)
+		return r;
+
+	memset(buf->p + buf->len, c, n);
+	buf->len += n;
+
+	return 0;
+}
+
+/**
  * c_dynbuf_insert() - Insert `len` bytes from `data` to dynamic buffer, starting at `pos`
  * @pos:
  * @data:
@@ -177,54 +197,6 @@ _public_ int c_dynbuf_insert(CDynBuf *buf, off_t pos, const void *data, size_t l
 	buf->len += len;
 
 	return 0;
-}
-
-/**
- * c_dynbuf_write() - Write `len` bytes from `data` to dynamic buffer, starting at `pos`
- * @pos:
- * @data:
- * @len:
- *
- * Returns 0 or -1.
- */
-_public_ int c_dynbuf_write(CDynBuf *buf, off_t pos, const void *data, size_t len) {
-	int r;
-
-	assert(buf != NULL);
-	assert(pos >= 0 && pos <= buf->len);
-	assert(data != NULL);
-
-	r = _expand_buf_to(buf, pos + len);
-	if (r < 0)
-		return r;
-
-	memcpy(buf->p + pos, data, len);
-	if (pos + len > buf->len)
-		buf->len = pos + len;
-
-	return 0;
-}
-
-/**
- * c_dynbuf_append_c() - XXX
- * @buf:                  dynamic buffer object to operate on
- * @c:
- * @n:
- */
-_public_ int c_dynbuf_append_c(CDynBuf *buf, int c, size_t n) {
-	int r;
-
-	assert(buf != NULL);
-
-	r = _expand_buf_to(buf, buf->len + n);
-	if (r < 0)
-		return r;
-
-	memset(buf->p + buf->len, c, n);
-	buf->len += n;
-
-	return 0;
-
 }
 
 /**
@@ -256,6 +228,51 @@ _public_ int c_dynbuf_insert_c(CDynBuf *buf, off_t pos, int c, size_t n) {
 }
 
 /**
+ * c_dynbuf_remove() - Remove `len` bytes from dynamic buffer, starting at `pos`
+ * @buf:                  dynamic buffer object to operate on
+ * @pos:
+ * @len:
+ */
+_public_ void c_dynbuf_remove(CDynBuf *buf, off_t pos, size_t len) {
+	assert(buf != NULL);
+	assert(pos >= 0 && pos <= buf->len && pos + len <= buf->len);
+
+	if (len == 0)
+		return;
+
+	_inbuf_memcpy(buf, pos, pos + len, buf->len - (pos + len));
+
+	buf->len -= len;
+	return;
+}
+
+/**
+ * c_dynbuf_write() - Write `len` bytes from `data` to dynamic buffer, starting at `pos`
+ * @pos:
+ * @data:
+ * @len:
+ *
+ * Returns 0 or -1.
+ */
+_public_ int c_dynbuf_write(CDynBuf *buf, off_t pos, const void *data, size_t len) {
+	int r;
+
+	assert(buf != NULL);
+	assert(pos >= 0 && pos <= buf->len);
+	assert(data != NULL);
+
+	r = _expand_buf_to(buf, pos + len);
+	if (r < 0)
+		return r;
+
+	memcpy(buf->p + pos, data, len);
+	if (pos + len > buf->len)
+		buf->len = pos + len;
+
+	return 0;
+}
+
+/**
  * c_dynbuf_write_c() - XXX
  * @buf:                  dynamic buffer object to operate on
  * @pos:
@@ -280,20 +297,34 @@ _public_ int c_dynbuf_write_c(CDynBuf *buf, off_t pos, int c, size_t n) {
 }
 
 /**
- * c_dynbuf_remove() - Remove `len` bytes from dynamic buffer, starting at `pos`
+ * c_dynbuf_expand() - XXXX
  * @buf:                  dynamic buffer object to operate on
- * @pos:
  * @len:
  */
-_public_ void c_dynbuf_remove(CDynBuf *buf, off_t pos, size_t len) {
+_public_ int c_dynbuf_expand(CDynBuf *buf, size_t len) {
+	int r;
+
 	assert(buf != NULL);
-	assert(pos >= 0 && pos <= buf->len && pos + len <= buf->len);
 
-	if (len == 0)
-		return;
+	r = _expand_buf_to(buf, buf->len + len);
+	if (r < 0)
+		return r;
 
-	_inbuf_memcpy(buf, pos, pos + len, buf->len - (pos + len));
+	buf->len += len;
+	return 0;
+}
+
+/**
+ * c_dynbuf_shrink() - XXXX
+ * @buf:                  dynamic buffer object to operate on
+ * @len:
+ */
+_public_ void c_dynbuf_shrink(CDynBuf *buf, size_t len) {
+	assert(buf != NULL);
+	assert(len <= buf->len);
+
 	buf->len -= len;
+	return;
 }
 
 /**
@@ -304,4 +335,5 @@ _public_ void c_dynbuf_clear(CDynBuf *buf) {
 	assert(buf != NULL);
 
 	buf->len = 0;
+	return;
 }
